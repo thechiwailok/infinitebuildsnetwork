@@ -1,0 +1,614 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Builds - Minecraft Server</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36BFFA',
+                        accent: '#00FFAA',
+                        dark: '#1E1E1E',
+                        light: '#F5F5F7'
+                    },
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif']
+                    },
+                    backdropBlur: {
+                        'xxl': '24px',
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .glass {
+                background: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            }
+            .glass-dark {
+                background: rgba(30, 30, 30, 0.6);
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .animate-float {
+                animation: float 6s ease-in-out infinite;
+            }
+            @keyframes float {
+                0% { transform: translateY(0px); }
+                50% { transform: translateY(-15px); }
+                100% { transform: translateY(0px); }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-dark to-slate-800 text-light min-h-screen font-sans overflow-x-hidden">
+    <!-- Background Elements -->
+    <div class="fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute top-20 left-1/4 w-96 h-96 bg-primary/20 rounded-full filter blur-3xl animate-float"></div>
+        <div class="absolute bottom-20 right-1/4 w-96 h-96 bg-secondary/20 rounded-full filter blur-3xl animate-float" style="animation-delay: 2s"></div>
+        <div class="absolute top-1/2 left-1/3 w-80 h-80 bg-accent/10 rounded-full filter blur-3xl animate-float" style="animation-delay: 4s"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="glass-dark sticky top-0 z-50 px-6 py-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <img src="https://assetsio.reedpopcdn.com/minecraft-house-ideas-3-floor-white-container-house.jpg?width=1200" alt="Infinite Builds Logo" class="w-10 h-10 rounded-lg object-cover">
+                <h1 class="text-2xl font-bold tracking-tight text-white" data-i18n="title">Infinite Builds</h1>
+            </div>
+            
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#about" class="text-white/80 hover:text-white transition-colors" data-i18n="nav.about">About</a>
+                <a href="#server" class="text-white/80 hover:text-white transition-colors" data-i18n="nav.server">Server Info</a>
+                <a href="#status" class="text-white/80 hover:text-white transition-colors" data-i18n="nav.status">Status</a>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <button id="langSwitch" class="glass px-3 py-1.5 rounded-full text-sm flex items-center gap-1 hover:bg-white/20 transition-colors">
+                    <i class="fa fa-globe"></i>
+                    <span id="currentLang">English</span>
+                </button>
+                
+                <button class="md:hidden text-white text-xl">
+                    <i class="fa fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative min-h-[80vh] flex items-center justify-center px-6 py-20">
+        <div class="container mx-auto text-center z-10">
+            <h1 class="text-[clamp(2.5rem,6vw,5rem)] font-bold leading-tight text-shadow mb-6" data-i18n="hero.title">
+                Infinite Builds
+            </h1>
+            <p class="text-[clamp(1.1rem,3vw,1.5rem)] text-white/80 max-w-3xl mx-auto mb-10" data-i18n="hero.subtitle">
+                Unleash your creativity in our Minecraft creative mode server
+            </p>
+            
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-16">
+                <a href="#server" class="glass hover:bg-white/20 transition-all px-8 py-3 rounded-full text-lg font-medium">
+                    <i class="fa fa-server mr-2"></i>
+                    <span data-i18n="hero.join">Join Server</span>
+                </a>
+                <a href="#status" class="glass-dark hover:bg-dark/80 transition-all px-8 py-3 rounded-full text-lg font-medium">
+                    <i class="fa fa-users mr-2"></i>
+                    <span data-i18n="hero.players">Current Players</span>
+                </a>
+            </div>
+            
+            <div class="glass-dark rounded-2xl p-6 inline-block">
+                <p class="text-white/70 mb-2 text-sm" data-i18n="hero.launch">Server Launch Date</p>
+                <p class="text-2xl font-semibold bg-gradient-to-r from-primary to-accent text-transparent bg-clip-text">25/8/2025</p>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-dark to-transparent"></div>
+    </header>
+
+    <!-- About Section -->
+    <section id="about" class="px-6 py-20">
+        <div class="container mx-auto max-w-6xl">
+            <div class="glass rounded-3xl p-8 md:p-12">
+                <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-8 text-center" data-i18n="about.title">About Our Server</h2>
+                
+                <div class="grid md:grid-cols-2 gap-10 items-center">
+                    <div>
+                        <p class="text-white/80 mb-6 text-lg" data-i18n="about.desc1">
+                            Infinite Builds is a creative mode Minecraft server where you can let your imagination run wild. Build magnificent structures, collaborate with other players, and showcase your creations.
+                        </p>
+                        <p class="text-white/80 mb-6 text-lg" data-i18n="about.desc2">
+                            Whether you're a seasoned builder or just starting out, our community welcomes all players to express their creativity in a supportive environment.
+                        </p>
+                        
+                        <div class="flex flex-wrap gap-4 mt-8">
+                            <div class="flex items-center gap-2 glass-dark px-4 py-2 rounded-full">
+                                <i class="fa fa-calendar text-accent"></i>
+                                <span data-i18n="about.launch">Launch: 25/8/2025</span>
+                            </div>
+                            <div class="flex items-center gap-2 glass-dark px-4 py-2 rounded-full">
+                                <i class="fa fa-gamepad text-accent"></i>
+                                <span data-i18n="about.mode">Creative Mode</span>
+                            </div>
+                            <div class="flex items-center gap-2 glass-dark px-4 py-2 rounded-full">
+                                <i class="fa fa-code-fork text-accent"></i>
+                                <span data-i18n="about.version">1.21.8</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rounded-2xl overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-transform">
+                        <img src="https://assetsio.reedpopcdn.com/minecraft-house-ideas-3-floor-white-container-house.jpg?width=1200" alt="Minecraft Creative Build" class="w-full h-auto">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Server Info Section -->
+    <section id="server" class="px-6 py-20 bg-dark/50">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-12 text-center" data-i18n="server.title">Server Information</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="glass rounded-2xl p-8 flex flex-col h-full">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="glass-dark p-3 rounded-full">
+                            <i class="fa fa-server text-2xl text-primary"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold" data-i18n="server.details">Server Details</h3>
+                    </div>
+                    
+                    <ul class="space-y-4 flex-grow">
+                        <li class="flex justify-between items-center pb-3 border-b border-white/10">
+                            <span class="text-white/70" data-i18n="server.name">Server Name</span>
+                            <span class="font-medium">Infinite Builds</span>
+                        </li>
+                        <li class="flex justify-between items-center pb-3 border-b border-white/10">
+                            <span class="text-white/70" data-i18n="server.ip">IP Address</span>
+                            <span class="font-medium">chiwailok.minekeep.gg</span>
+                        </li>
+                        <li class="flex justify-between items-center pb-3 border-b border-white/10">
+                            <span class="text-white/70" data-i18n="server.version">Version</span>
+                            <span class="font-medium">1.21.8</span>
+                        </li>
+                        <li class="flex justify-between items-center pb-3 border-b border-white/10">
+                            <span class="text-white/70" data-i18n="server.mode">Game Mode</span>
+                            <span class="font-medium" data-i18n="server.creative">Creative</span>
+                        </li>
+                        <li class="flex justify-between items-center">
+                            <span class="text-white/70" data-i18n="server.platforms">Platforms</span>
+                            <div class="flex gap-2">
+                                <span class="glass-dark px-2 py-1 rounded text-sm" data-i18n="server.java">Java</span>
+                                <span class="glass-dark px-2 py-1 rounded text-sm" data-i18n="server.bedrock">Bedrock</span>
+                            </div>
+                        </li>
+                    </ul>
+                    
+                    <button class="mt-8 glass hover:bg-white/20 transition-all py-3 rounded-xl font-medium" onclick="copyToClipboard('chiwailok.minekeep.gg')">
+                        <i class="fa fa-copy mr-2"></i>
+                        <span data-i18n="server.copy">Copy IP Address</span>
+                    </button>
+                </div>
+                
+                <div class="glass rounded-2xl p-8">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="glass-dark p-3 rounded-full">
+                            <i class="fa fa-info-circle text-2xl text-secondary"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold" data-i18n="server.howToJoin">How to Join</h3>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-medium mb-2 flex items-center gap-2">
+                                <i class="fa fa-java text-accent"></i>
+                                <span data-i18n="server.java">Java Edition</span>
+                            </h4>
+                            <ol class="list-decimal list-inside text-white/80 space-y-2 ml-2" data-i18n="server.javaSteps">
+                                <li>Open Minecraft Java Edition</li>
+                                <li>Go to Multiplayer</li>
+                                <li>Click "Add Server"</li>
+                                <li>Enter "Infinite Builds" as the server name</li>
+                                <li>Enter "chiwailok.minekeep.gg" as the server address</li>
+                                <li>Click "Done" and then "Join Server"</li>
+                            </ol>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-medium mb-2 flex items-center gap-2">
+                                <i class="fa fa-mobile text-accent text-lg"></i>
+                                <span data-i18n="server.bedrock">Bedrock Edition</span>
+                            </h4>
+                            <ol class="list-decimal list-inside text-white/80 space-y-2 ml-2" data-i18n="server.bedrockSteps">
+                                <li>Open Minecraft Bedrock Edition</li>
+                                <li>Go to "Servers" tab</li>
+                                <li>Click "Add Server"</li>
+                                <li>Enter "Infinite Builds" as the server name</li>
+                                <li>Enter "chiwailok.minekeep.gg" as the server address</li>
+                                <li>Use port 19132</li>
+                                <li>Click "Save" and then "Join"</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Player Status Section -->
+    <section id="status" class="px-6 py-20">
+        <div class="container mx-auto max-w-6xl">
+            <h2 class="text-[clamp(1.8rem,4vw,2.5rem)] font-bold mb-12 text-center" data-i18n="status.title">Server Status</h2>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="glass rounded-2xl p-8 text-center">
+                    <div class="text-5xl mb-4 text-accent">
+                        <i class="fa fa-signal"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2" data-i18n="status.status">Server Status</h3>
+                    <div class="glass-dark inline-block px-4 py-1 rounded-full text-sm font-medium text-green-400" data-i18n="status.online">Online</div>
+                </div>
+                
+                <div class="glass rounded-2xl p-8 text-center">
+                    <div class="text-5xl mb-4 text-primary">
+                        <i class="fa fa-users"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2" data-i18n="status.currentPlayers">Current Players</h3>
+                    <p class="text-4xl font-bold" id="playerCount">0</p>
+                    <p class="text-white/60 mt-2 text-sm" data-i18n="status.ofMax">of 50 max players</p>
+                </div>
+                
+                <div class="glass rounded-2xl p-8 text-center">
+                    <div class="text-5xl mb-4 text-secondary">
+                        <i class="fa fa-clock-o"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2" data-i18n="status.uptime">Uptime</h3>
+                    <p class="text-2xl font-bold" id="uptime">0d 0h 0m</p>
+                    <p class="text-white/60 mt-2 text-sm" data-i18n="status.sinceLaunch" id="sinceLaunch">Since launch on 25/8/2025</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="glass-dark px-6 py-12">
+        <div class="container mx-auto max-w-6xl">
+            <div class="grid md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <img src="https://picsum.photos/50/50?random=1" alt="Infinite Builds Logo" class="w-8 h-8 rounded-lg object-cover">
+                        <h3 class="text-xl font-bold" data-i18n="title">Infinite Builds</h3>
+                    </div>
+                    <p class="text-white/60 text-sm" data-i18n="footer.tagline">Unleash your creativity in our Minecraft creative server</p>
+                </div>
+                
+                <div>
+                    <h4 class="font-medium mb-4" data-i18n="footer.links">Quick Links</h4>
+                    <ul class="space-y-2 text-sm text-white/60">
+                        <li><a href="#about" class="hover:text-white transition-colors" data-i18n="nav.about">About</a></li>
+                        <li><a href="#server" class="hover:text-white transition-colors" data-i18n="nav.server">Server Info</a></li>
+                        <li><a href="#status" class="hover:text-white transition-colors" data-i18n="nav.status">Status</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-medium mb-4" data-i18n="footer.server">Server</h4>
+                    <ul class="space-y-2 text-sm text-white/60">
+                        <li data-i18n="footer.ip">IP: chiwailok.minekeep.gg</li>
+                        <li data-i18n="footer.version">Version: 1.21.8</li>
+                        <li data-i18n="footer.mode">Mode: Creative</li>
+                        <li data-i18n="footer.platforms">Java &amp; Bedrock</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-medium mb-4" data-i18n="footer.connect">Connect With Us</h4>
+                    <div class="flex gap-4 mb-4">
+                        <a href="https://discord.gg/F9cZhpsDcs" target="_blank" rel="noopener noreferrer" class="glass hover:bg-white/20 transition-colors px-4 py-2 rounded-lg flex items-center gap-2">
+                            <i class="fa fa-discord text-xl"></i>
+                            <span data-i18n="footer.joinDiscordBtn">Join Discord</span>
+                        </a>
+                    </div>
+                    <p class="text-white/60 text-sm" data-i18n="footer.joinDiscord">Join our Discord community for updates and support</p>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-white/10 text-center text-white/40 text-sm" data-i18n="footer.copyright">
+                © 2025 Infinite Builds. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Language translations
+        const translations = {
+            en: {
+                title: "Infinite Builds",
+                nav: {
+                    about: "About",
+                    server: "Server Info",
+                    status: "Status"
+                },
+                hero: {
+                    title: "Infinite Builds",
+                    subtitle: "Unleash your creativity in our Minecraft creative mode server",
+                    join: "Join Server",
+                    players: "Current Players",
+                    launch: "Server Launch Date"
+                },
+                about: {
+                    title: "About Our Server",
+                    desc1: "Infinite Builds is a creative mode Minecraft server where you can let your imagination run wild. Build magnificent structures, collaborate with other players, and showcase your creations.",
+                    desc2: "Whether you're a seasoned builder or just starting out, our community welcomes all players to express their creativity in a supportive environment.",
+                    launch: "Launch: 25/8/2025",
+                    mode: "Creative Mode",
+                    version: "1.21.8"
+                },
+                server: {
+                    title: "Server Information",
+                    details: "Server Details",
+                    howToJoin: "How to Join",
+                    name: "Server Name",
+                    ip: "IP Address",
+                    version: "Version",
+                    mode: "Game Mode",
+                    creative: "Creative",
+                    platforms: "Platforms",
+                    java: "Java",
+                    bedrock: "Bedrock",
+                    copy: "Copy IP Address",
+                    javaSteps: [
+                        "Open Minecraft Java Edition",
+                        "Go to Multiplayer",
+                        "Click \"Add Server\"",
+                        "Enter \"Infinite Builds\" as the server name",
+                        "Enter \"chiwailok.minekeep.gg\" as the server address",
+                        "Click \"Done\" and then \"Join Server\""
+                    ],
+                    bedrockSteps: [
+                        "Open Minecraft Bedrock Edition",
+                        "Go to \"Servers\" tab",
+                        "Click \"Add Server\"",
+                        "Enter \"Infinite Builds\" as the server name",
+                        "Enter \"chiwailok.minekeep.gg\" as the server address",
+                        "Use port 19132",
+                        "Click \"Save\" and then \"Join\""
+                    ]
+                },
+                status: {
+                    title: "Server Status",
+                    status: "Server Status",
+                    online: "Online",
+                    currentPlayers: "Current Players",
+                    ofMax: "of 50 max players",
+                    uptime: "Uptime",
+                    sinceLaunch: "Since launch on 25/8/2025",
+                    playerActivity: "Player Activity"
+                },
+                footer: {
+                    tagline: "Unleash your creativity in our Minecraft creative server",
+                    links: "Quick Links",
+                    server: "Server",
+                    connect: "Connect With Us",
+                    ip: "IP: chiwailok.minekeep.gg",
+                    version: "Version: 1.21.8",
+                    mode: "Mode: Creative",
+                    platforms: "Java & Bedrock",
+                    joinDiscord: "Join our Discord community for updates and support",
+                    joinDiscordBtn: "Join Discord",
+                    copyright: "&copy; 2025 Infinite Builds. All rights reserved."
+                }
+            },
+            zh: {
+                title: "無限建築",
+                nav: {
+                    about: "關於我們",
+                    server: "伺服器資訊",
+                    status: "伺服器狀態"
+                },
+                hero: {
+                    title: "無限建築",
+                    subtitle: "在我們的 Minecraft 創造模式伺服器中釋放你的創造力",
+                    join: "加入伺服器",
+                    players: "當前玩家",
+                    launch: "伺服器啟動日期"
+                },
+                about: {
+                    title: "關於我們的伺服器",
+                    desc1: "無限建築是一個 Minecraft 創造模式伺服器，你可以讓你的想像力自由馳騁。建造宏偉的建築，與其他玩家合作，展示你的創作。",
+                    desc2: "無論你是經驗豐富的建築師還是剛剛入門，我們的社區歡迎所有玩家在支持性的環境中表達他們的創造力。",
+                    launch: "啟動日期: 2025年8月25日",
+                    mode: "創造模式",
+                    version: "1.21.8版本"
+                },
+                server: {
+                    title: "伺服器資訊",
+                    details: "伺服器詳情",
+                    howToJoin: "如何加入",
+                    name: "伺服器名稱",
+                    ip: "IP地址",
+                    version: "版本",
+                    mode: "遊戲模式",
+                    creative: "創造模式",
+                    platforms: "平台",
+                    java: "Java版",
+                    bedrock: "基岩版",
+                    copy: "複製IP地址",
+                    javaSteps: [
+                        "打開Minecraft Java版",
+                        "進入多人遊戲",
+                        "點擊「添加伺服器」",
+                        "輸入「無限建築」作為伺服器名稱",
+                        "輸入「chiwailok.minekeep.gg」作為伺服器地址",
+                        "點擊「完成」然後「加入伺服器」"
+                    ],
+                    bedrockSteps: [
+                        "打開Minecraft基岩版",
+                        "進入「伺服器」標籤",
+                        "點擊「添加伺服器」",
+                        "輸入「無限建築」作為伺服器名稱",
+                        "輸入「chiwailok.minekeep.gg」作為伺服器地址",
+                        "使用端口19132",
+                        "點擊「保存」然後「加入」"
+                    ]
+                },
+                status: {
+                    title: "伺服器狀態",
+                    status: "伺服器狀態",
+                    online: "在線",
+                    currentPlayers: "當前玩家",
+                    ofMax: "最多50名玩家",
+                    uptime: "運行時間",
+                    sinceLaunch: "自2025年8月25日啟動以來",
+                    playerActivity: "玩家活動"
+                },
+                footer: {
+                    tagline: "在我們的Minecraft創造模式伺服器中釋放你的創造力",
+                    links: "快速鏈接",
+                    server: "伺服器",
+                    connect: "聯繫我們",
+                    ip: "IP: chiwailok.minekeep.gg",
+                    version: "版本: 1.21.8",
+                    mode: "模式: 創造模式",
+                    platforms: "Java版和基岩版",
+                    joinDiscord: "加入我們的Discord社區以獲取更新和支持",
+                    joinDiscordBtn: "加入Discord",
+                    copyright: "© 2025 無限建築。保留所有權利。"
+                }
+            }
+        };
+
+        // Current language
+        let currentLang = 'en';
+        
+        // Language switch functionality
+        document.getElementById('langSwitch').addEventListener('click', function() {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            document.getElementById('currentLang').textContent = currentLang === 'en' ? 'English' : '繁體中文';
+            updateLanguage();
+        });
+        
+        // Update all text elements with current language
+        function updateLanguage() {
+            const elements = document.querySelectorAll('[data-i18n]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                const keys = key.split('.');
+                
+                // Get translation from nested object
+                let translation = translations[currentLang];
+                for (const k of keys) {
+                    if (translation[k] !== undefined) {
+                        translation = translation[k];
+                    } else {
+                        translation = null;
+                        break;
+                    }
+                }
+                
+                // Handle special cases like lists
+                if (Array.isArray(translation) && element.tagName === 'OL') {
+                    element.innerHTML = '';
+                    translation.forEach(item => {
+                        const li = document.createElement('li');
+                        li.textContent = item;
+                        element.appendChild(li);
+                    });
+                } else if (translation !== null) {
+                    element.innerHTML = translation;
+                }
+            });
+        }
+        
+        // Copy IP to clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const button = document.querySelector('button[onclick^="copyToClipboard"]');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fa fa-check mr-2"></i><span data-i18n="server.copied">Copied!</span>';
+                updateLanguage(); // Update the "Copied!" text in current language
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    updateLanguage(); // Revert to original text in current language
+                }, 2000);
+            });
+        }
+        
+        // Add "Copied!" translation to both languages
+        translations.en.server.copied = "Copied!";
+        translations.zh.server.copied = "已複製!";
+        
+        // Simulate player count updates
+        function updatePlayerCount() {
+            const playerCountElement = document.getElementById('playerCount');
+            const currentCount = parseInt(playerCountElement.textContent);
+            // Randomly vary player count between 0 and 20 for demo purposes
+            const newCount = Math.max(0, Math.min(20, currentCount + (Math.random() > 0.7 ? 1 : Math.random() > 0.3 ? -1 : 0)));
+            playerCountElement.textContent = newCount;
+        }
+        
+        // Update server uptime
+        function updateUptime() {
+            const launchDate = new Date('2025-08-25T00:00:00');
+            const now = new Date();
+            const diffMs = now - launchDate;
+            
+            if (diffMs < 0) {
+                document.getElementById('uptime').textContent = "Coming Soon";
+                return;
+            }
+            
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            
+            document.getElementById('uptime').textContent = `${diffDays}d ${diffHours}h ${diffMins}m`;
+        }
+        
+        // Initialize everything
+        window.addEventListener('DOMContentLoaded', () => {
+            // Update language once on load
+            updateLanguage();
+            
+            // Update player count every 10 seconds
+            updatePlayerCount();
+            setInterval(updatePlayerCount, 10000);
+            
+            // Update uptime every minute
+            updateUptime();
+            setInterval(updateUptime, 60000);
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+
+
+    </body></html>
